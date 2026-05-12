@@ -1,1 +1,302 @@
 results/README.md
+#========================================================
+# CREAR CARPETAS
+#========================================================
+
+dir.create("Resultados", showWarnings = FALSE)
+dir.create("Figuras", showWarnings = FALSE)
+
+#========================================================
+# EXPORTAR TABLAS
+#========================================================
+
+#--------------------------------------------------------
+# TABLA DESCRIPTIVOS POR SEXO
+#--------------------------------------------------------
+
+tabla_sexo <- df %>%
+  group_by(sex) %>%
+  summarise(
+    n = n(),
+    
+    mean_exam1 = mean(exam1, na.rm = TRUE),
+    sd_exam1   = sd(exam1, na.rm = TRUE),
+    
+    mean_exam2 = mean(exam2, na.rm = TRUE),
+    sd_exam2   = sd(exam2, na.rm = TRUE),
+    
+    mean_exam3 = mean(exam3, na.rm = TRUE),
+    sd_exam3   = sd(exam3, na.rm = TRUE),
+    
+    mean_course = mean(course_grade, na.rm = TRUE),
+    sd_course   = sd(course_grade, na.rm = TRUE)
+  )
+
+write.csv(tabla_sexo,
+          "Resultados/descriptivos_sexo.csv",
+          row.names = FALSE)
+
+#--------------------------------------------------------
+# TABLA DESCRIPTIVOS EXAMENES
+#--------------------------------------------------------
+
+tabla_examenes <- df %>%
+  summarise(
+    mean_exam1 = mean(exam1, na.rm = TRUE),
+    sd_exam1   = sd(exam1, na.rm = TRUE),
+    
+    mean_exam2 = mean(exam2, na.rm = TRUE),
+    sd_exam2   = sd(exam2, na.rm = TRUE),
+    
+    mean_exam3 = mean(exam3, na.rm = TRUE),
+    sd_exam3   = sd(exam3, na.rm = TRUE)
+  )
+
+write.csv(tabla_examenes,
+          "Resultados/descriptivos_examenes.csv",
+          row.names = FALSE)
+
+#========================================================
+# EXPORTAR RESULTADOS T TEST
+#========================================================
+
+#--------------------------------------------------------
+# TABLA T TEST SEXO
+#--------------------------------------------------------
+
+tabla_tsexo <- data.frame(
+  
+  Variable = c("Exam1",
+               "Exam2",
+               "Exam3",
+               "Course_Grade"),
+  
+  p_value = c(
+    t1$p.value,
+    t2$p.value,
+    t3$p.value,
+    t4$p.value
+  ),
+  
+  mean_group1 = c(
+    t1$estimate[1],
+    t2$estimate[1],
+    t3$estimate[1],
+    t4$estimate[1]
+  ),
+  
+  mean_group2 = c(
+    t1$estimate[2],
+    t2$estimate[2],
+    t3$estimate[2],
+    t4$estimate[2]
+  )
+)
+
+write.csv(tabla_tsexo,
+          "Resultados/t_test_sexo.csv",
+          row.names = FALSE)
+
+#--------------------------------------------------------
+# TABLA T TEST PAREADOS
+#--------------------------------------------------------
+
+tabla_pareados <- data.frame(
+  
+  Comparison = c(
+    "Exam1_vs_Exam2",
+    "Exam1_vs_Exam3",
+    "Exam2_vs_Exam3"
+  ),
+  
+  p_value = c(
+    pair12$p.value,
+    pair13$p.value,
+    pair23$p.value
+  ),
+  
+  statistic_t = c(
+    pair12$statistic,
+    pair13$statistic,
+    pair23$statistic
+  )
+)
+
+write.csv(tabla_pareados,
+          "Resultados/t_test_pareados.csv",
+          row.names = FALSE)
+
+#========================================================
+# GUARDAR FIGURAS
+#========================================================
+
+#--------------------------------------------------------
+# FIGURA EXAM 1
+#--------------------------------------------------------
+
+g1 <- ggplot(df,
+             aes(x = sex,
+                 y = exam1,
+                 fill = sex)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.5) +
+  
+  labs(title = "Exam 1 by Sex",
+       x = "Sex",
+       y = "Exam 1 Score") +
+  
+  theme_minimal()
+
+g1
+
+ggsave("Figuras/boxplot_exam1.png",
+       plot = g1,
+       width = 6,
+       height = 4,
+       dpi = 300)
+
+#--------------------------------------------------------
+# FIGURA EXAM 2
+#--------------------------------------------------------
+
+g2 <- ggplot(df,
+             aes(x = sex,
+                 y = exam2,
+                 fill = sex)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.5) +
+  
+  labs(title = "Exam 2 by Sex",
+       x = "Sex",
+       y = "Exam 2 Score") +
+  
+  theme_minimal()
+
+g2
+
+ggsave("Figuras/boxplot_exam2.png",
+       plot = g2,
+       width = 6,
+       height = 4,
+       dpi = 300)
+
+#--------------------------------------------------------
+# FIGURA EXAM 3
+#--------------------------------------------------------
+
+g3 <- ggplot(df,
+             aes(x = sex,
+                 y = exam3,
+                 fill = sex)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.5) +
+  
+  labs(title = "Exam 3 by Sex",
+       x = "Sex",
+       y = "Exam 3 Score") +
+  
+  theme_minimal()
+
+g3
+
+ggsave("Figuras/boxplot_exam3.png",
+       plot = g3,
+       width = 6,
+       height = 4,
+       dpi = 300)
+
+#--------------------------------------------------------
+# FIGURA NOTA FINAL
+#--------------------------------------------------------
+
+g4 <- ggplot(df,
+             aes(x = sex,
+                 y = course_grade,
+                 fill = sex)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.5) +
+  
+  labs(title = "Final Course Grade by Sex",
+       x = "Sex",
+       y = "Final Grade") +
+  
+  theme_minimal()
+
+g4
+
+ggsave("Figuras/boxplot_course_grade.png",
+       plot = g4,
+       width = 6,
+       height = 4,
+       dpi = 300)
+
+#--------------------------------------------------------
+# FIGURA BOXPLOT GENERAL
+#--------------------------------------------------------
+
+g5 <- ggplot(df_long,
+             aes(x = exam,
+                 y = score,
+                 fill = exam)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.3) +
+  
+  labs(title = "Distribution of Exam Scores",
+       x = "Exam",
+       y = "Score") +
+  
+  theme_minimal()
+
+g5
+
+ggsave("Figuras/boxplot_all_exams.png",
+       plot = g5,
+       width = 6,
+       height = 4,
+       dpi = 300)
+
+#--------------------------------------------------------
+# FIGURA EVOLUCION MEDIAS
+#--------------------------------------------------------
+
+g6 <- ggplot(means,
+             aes(x = exam,
+                 y = mean_score,
+                 group = 1)) +
+  
+  geom_line(linewidth = 1) +
+  
+  geom_point(size = 3) +
+  
+  geom_errorbar(aes(ymin = mean_score - se,
+                    ymax = mean_score + se),
+                width = 0.1) +
+  
+  labs(title = "Mean Scores Across Exams",
+       x = "Exam",
+       y = "Mean Score") +
+  
+  theme_minimal()
+
+g6
+
+ggsave("Figuras/mean_scores_exams.png",
+       plot = g6,
+       width = 6,
+       height = 4,
+       dpi = 300)
