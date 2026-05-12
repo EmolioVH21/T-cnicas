@@ -1,0 +1,290 @@
+scripts/README.md
+#-----------------------------------------------------------------------------------------------------
+#**Para evaluar hipotesis 1: Diferencias en el promedio entre hombres y mujeres
+#-----------------------------------------------------------------------------------------------------
+#--------------------------------------------------------
+# LIBRERIAS
+#--------------------------------------------------------
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+#--------------------------------------------------------
+# CARGAR DATOS
+#--------------------------------------------------------
+df <- read.csv("exam_grades.csv")
+
+# Ver primeras filas
+head(df)
+
+# Convertir sexo a factor
+df$sex <- as.factor(df$sex)
+
+# Ver niveles
+levels(df$sex)
+
+#========================================================
+# Promedio por exámen entre género
+#========================================================
+
+df %>%
+  group_by(sex) %>%
+  summarise(
+    n = n(),
+    
+    mean_exam1 = mean(exam1, na.rm = TRUE),
+    sd_exam1   = sd(exam1, na.rm = TRUE),
+    
+    mean_exam2 = mean(exam2, na.rm = TRUE),
+    sd_exam2   = sd(exam2, na.rm = TRUE),
+    
+    mean_exam3 = mean(exam3, na.rm = TRUE),
+    sd_exam3   = sd(exam3, na.rm = TRUE),
+    
+    mean_course = mean(course_grade, na.rm = TRUE),
+    sd_course   = sd(course_grade, na.rm = TRUE)
+  )
+
+#========================================================
+# PRUEBAS T
+#========================================================
+
+#------------------------------
+# EXAM 1
+#------------------------------
+t1 <- t.test(exam1 ~ sex,
+             data = df)
+
+t1
+
+#------------------------------
+# EXAM 2
+#------------------------------
+t2 <- t.test(exam2 ~ sex,
+             data = df)
+
+t2
+
+#------------------------------
+# EXAM 3
+#------------------------------
+t3 <- t.test(exam3 ~ sex,
+             data = df)
+
+t3
+
+#------------------------------
+# NOTA FINAL
+#------------------------------
+t4 <- t.test(course_grade ~ sex,
+             data = df)
+
+t4
+
+#========================================================
+# BOXPLOTS POR SEXO
+#========================================================
+
+#--------------------------------------------------------
+# EXAM 1
+#--------------------------------------------------------
+ggplot(df,
+       aes(x = sex,
+           y = exam1,
+           fill = sex)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.5) +
+  
+  labs(title = "Exam 1 by Sex",
+       x = "Sex",
+       y = "Exam 1 Score") +
+  
+  theme_minimal()
+
+#--------------------------------------------------------
+# EXAM 2
+#--------------------------------------------------------
+ggplot(df,
+       aes(x = sex,
+           y = exam2,
+           fill = sex)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.5) +
+  
+  labs(title = "Exam 2 by Sex",
+       x = "Sex",
+       y = "Exam 2 Score") +
+  
+  theme_minimal()
+
+#--------------------------------------------------------
+# EXAM 3
+#--------------------------------------------------------
+ggplot(df,
+       aes(x = sex,
+           y = exam3,
+           fill = sex)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.5) +
+  
+  labs(title = "Exam 3 by Sex",
+       x = "Sex",
+       y = "Exam 3 Score") +
+  
+  theme_minimal()
+
+#--------------------------------------------------------
+# COURSE GRADE
+#--------------------------------------------------------
+ggplot(df,
+       aes(x = sex,
+           y = course_grade,
+           fill = sex)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.5) +
+  
+  labs(title = "Final Course Grade by Sex",
+       x = "Sex",
+       y = "Final Grade") +
+  
+  theme_minimal()
+
+#-----------------------------------------------------------------------------------------------------
+#**Para evaluar hipotesis 2: Ver si existen diferencias entre los examenes de los estudiantes (ver si mejoran o empeoran entre exámenes)
+#-----------------------------------------------------------------------------------------------------
+#========================================================
+# DESCRIPTIVOS
+#========================================================
+
+df %>%
+  summarise(
+    mean_exam1 = mean(exam1, na.rm = TRUE),
+    sd_exam1   = sd(exam1, na.rm = TRUE),
+    
+    mean_exam2 = mean(exam2, na.rm = TRUE),
+    sd_exam2   = sd(exam2, na.rm = TRUE),
+    
+    mean_exam3 = mean(exam3, na.rm = TRUE),
+    sd_exam3   = sd(exam3, na.rm = TRUE)
+  )
+
+#========================================================
+# PRUEBAS T PAREADAS
+#========================================================
+
+#------------------------------
+# EXAM 1 vs EXAM 2
+#------------------------------
+pair12 <- t.test(df$exam1,
+                 df$exam2,
+                 paired = TRUE)
+
+pair12
+
+#------------------------------
+# EXAM 1 vs EXAM 3
+#------------------------------
+pair13 <- t.test(df$exam1,
+                 df$exam3,
+                 paired = TRUE)
+
+pair13
+
+#------------------------------
+# EXAM 2 vs EXAM 3
+#------------------------------
+pair23 <- t.test(df$exam2,
+                 df$exam3,
+                 paired = TRUE)
+
+pair23
+
+#========================================================
+# GRAFICO DE EVOLUCION
+#========================================================
+
+#--------------------------------------------------------
+# PASAR A FORMATO LARGO
+#--------------------------------------------------------
+
+df_long <- df %>%
+  pivot_longer(
+    cols = c(exam1, exam2, exam3),
+    names_to = "exam",
+    values_to = "score"
+  )
+
+#--------------------------------------------------------
+# BOXPLOT GENERAL
+#--------------------------------------------------------
+
+ggplot(df_long,
+       aes(x = exam,
+           y = score,
+           fill = exam)) +
+  
+  geom_boxplot(alpha = 0.7) +
+  
+  geom_jitter(width = 0.1,
+              alpha = 0.3) +
+  
+  labs(title = "Distribution of Exam Scores",
+       x = "Exam",
+       y = "Score") +
+  
+  theme_minimal()
+
+#========================================================
+# GRAFICO DE MEDIAS
+#========================================================
+
+means <- df_long %>%
+  group_by(exam) %>%
+  summarise(
+    mean_score = mean(score, na.rm = TRUE),
+    sd_score = sd(score, na.rm = TRUE),
+    n = n(),
+    se = sd_score / sqrt(n)
+  )
+
+ggplot(means,
+       aes(x = exam,
+           y = mean_score,
+           group = 1)) +
+  
+  geom_line(linewidth = 1) +
+  
+  geom_point(size = 3) +
+  
+  geom_errorbar(aes(ymin = mean_score - se,
+                    ymax = mean_score + se),
+                width = 0.1) +
+  
+  labs(title = "Mean Scores Across Exams",
+       x = "Exam",
+       y = "Mean Score") +
+  
+  theme_minimal()
+
+#========================================================
+# INTERPRETACION
+#========================================================
+
+# Si p < 0.05:
+# Existe diferencia significativa
+#
+# Si p >= 0.05:
+# No existe evidencia suficiente de diferencia
+
