@@ -1,0 +1,25 @@
+====================================================
+HYPOTHESIS 1: DIFFERENCES BETWEEN MEN AND WOMEN
+====================================================
+
+--------------------------------------------
+DESCRIPTIVE STATISTICS
+--------------------------------------------
+
+# A tibble: 2 × 10
+  sex       n mean_exam1 sd_exam1 mean_exam2 sd_exam2 mean_exam3 sd_exam3
+  <fct> <int>      <dbl>    <dbl>      <dbl>    <dbl>      <dbl>    <dbl>
+1 Man     188       81.2     10.5       72.7     13.3       75.1     14.7
+2 Woman    45       79.1     13.0       72.3     15.8       77.2     15.0
+# ℹ 2 more variables: mean_course <dbl>, sd_course <dbl>
+
+
+--------------------------------------------
+T TEST RESULTS
+--------------------------------------------
+
+      Variable   p_value t_statistic
+1        Exam1 0.3134190   1.0168047
+2        Exam2 0.8992216   0.1271836
+3        Exam3 0.3856629  -0.8733371
+4 Course_Grade 0.1362895  -1.5076535
